@@ -1,17 +1,12 @@
 package nl.hu.dp.ovchip.persistency.dao;
 
-import nl.hu.dp.ovchip.domain.OVChipkaart;
 import nl.hu.dp.ovchip.domain.Reiziger;
-import nl.hu.dp.ovchip.persistency.interfaces.AdresDAO;
-import nl.hu.dp.ovchip.persistency.interfaces.OVChipkaartDAO;
 import nl.hu.dp.ovchip.persistency.interfaces.ReizigerDAO;
 import org.hibernate.Session;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.Query;
-import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReizigerDAOHibernate implements ReizigerDAO {
@@ -24,15 +19,13 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     @Override
     public boolean save(Reiziger reiziger) {
         try {
-            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
-                session.beginTransaction();
-            }
+            queueTransaction();
             session.save(reiziger);
-
             session.getTransaction().commit();
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
         return false;
@@ -41,15 +34,13 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     @Override
     public boolean update(Reiziger reiziger) {
         try {
-            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
-                session.beginTransaction();
-            }
+            queueTransaction();
             session.update(reiziger);
-
             session.getTransaction().commit();
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
         return false;
@@ -58,15 +49,13 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     @Override
     public boolean delete(Reiziger reiziger) {
         try {
-            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
-                session.beginTransaction();
-            }
-
+            queueTransaction();
             session.delete(reiziger);
             session.getTransaction().commit();
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
         return false;
     }
@@ -79,7 +68,7 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
     @Override
     public List<Reiziger> findByGbdatum(String datum) {
         Query query = session.createQuery("from Reiziger where geboortedatum = :geboortedatum");
-        query.setParameter("geboortedatum", java.sql.Date.valueOf(datum));
+        query.setParameter("geboortedatum", LocalDate.parse(datum));
 
         return query.getResultList();
     }
@@ -89,5 +78,17 @@ public class ReizigerDAOHibernate implements ReizigerDAO {
         Query query = session.createQuery("from Reiziger");
 
         return query.getResultList();
+    }
+
+    private boolean queueTransaction() {
+        try {
+            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
+                session.beginTransaction();
+                return true;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return false;
     }
 }

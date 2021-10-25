@@ -41,27 +41,47 @@ public class OVChipkaart {
         return kaartNummer;
     }
 
+    public void setKaartNummer(int kaartNummer) {
+        this.kaartNummer = kaartNummer;
+    }
+
     public LocalDate getGeldigTot() {
         return geldigTot;
+    }
+
+    public void setGeldigTot(LocalDate geldigTot) {
+        this.geldigTot = geldigTot;
     }
 
     public int getKlasse() {
         return klasse;
     }
 
+    public void setKlasse(int klasse) {
+        this.klasse = klasse;
+    }
+
     public double getSaldo() {
         return saldo;
+    }
+
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
     }
 
     public Reiziger getReiziger() {
         return reiziger;
     }
 
+    public void setReiziger(Reiziger reiziger) {
+        this.reiziger = reiziger;
+    }
+
     public List<Product> getProductList() {
         return productList;
     }
 
-   public void addProduct(Product product) {
+    public void addProduct(Product product) {
        if (!productList.contains(product)) {
            productList.add(product);
        }

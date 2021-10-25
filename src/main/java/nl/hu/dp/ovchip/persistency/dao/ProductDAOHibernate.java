@@ -3,6 +3,7 @@ package nl.hu.dp.ovchip.persistency.dao;
 import nl.hu.dp.ovchip.domain.Product;
 import nl.hu.dp.ovchip.persistency.interfaces.ProductDAO;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.Query;
 import java.util.List;
@@ -17,7 +18,7 @@ public class ProductDAOHibernate implements ProductDAO {
     @Override
     public boolean save(Product product) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.save(product);
             session.getTransaction().commit();
             return true;
@@ -31,7 +32,7 @@ public class ProductDAOHibernate implements ProductDAO {
     @Override
     public boolean update(Product product) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.update(product);
             session.getTransaction().commit();
             return true;
@@ -45,7 +46,7 @@ public class ProductDAOHibernate implements ProductDAO {
     @Override
     public boolean delete(Product product) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.delete(product);
             session.getTransaction().commit();
             return true;
@@ -66,5 +67,17 @@ public class ProductDAOHibernate implements ProductDAO {
         Query query = session.createQuery("from Product");
 
         return query.getResultList();
+    }
+
+    private boolean queueTransaction() {
+        try {
+            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
+                session.beginTransaction();
+                return true;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return false;
     }
 }

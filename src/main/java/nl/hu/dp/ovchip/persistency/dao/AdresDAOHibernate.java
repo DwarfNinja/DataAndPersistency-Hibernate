@@ -4,6 +4,7 @@ import nl.hu.dp.ovchip.domain.Adres;
 import nl.hu.dp.ovchip.domain.Reiziger;
 import nl.hu.dp.ovchip.persistency.interfaces.AdresDAO;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.Query;
 import java.util.List;
@@ -18,7 +19,7 @@ public class AdresDAOHibernate implements AdresDAO {
     @Override
     public boolean save(Adres adres) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.save(adres);
             session.getTransaction().commit();
             return true;
@@ -32,7 +33,7 @@ public class AdresDAOHibernate implements AdresDAO {
     @Override
     public boolean update(Adres adres) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.update(adres);
             session.getTransaction().commit();
             return true;
@@ -46,7 +47,7 @@ public class AdresDAOHibernate implements AdresDAO {
     @Override
     public boolean delete(Adres adres) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.delete(adres);
             session.getTransaction().commit();
             return true;
@@ -89,5 +90,17 @@ public class AdresDAOHibernate implements AdresDAO {
         Query query = session.createQuery("from Adres");
 
         return query.getResultList();
+    }
+
+    private boolean queueTransaction() {
+        try {
+            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
+                session.beginTransaction();
+                return true;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return false;
     }
 }

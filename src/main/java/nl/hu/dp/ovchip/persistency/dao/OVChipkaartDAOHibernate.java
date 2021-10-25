@@ -5,6 +5,7 @@ import nl.hu.dp.ovchip.domain.Product;
 import nl.hu.dp.ovchip.domain.Reiziger;
 import nl.hu.dp.ovchip.persistency.interfaces.OVChipkaartDAO;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.Query;
 import java.util.List;
@@ -19,7 +20,7 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
     @Override
     public boolean save(OVChipkaart ovChipkaart) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.save(ovChipkaart);
             session.getTransaction().commit();
             return true;
@@ -33,7 +34,7 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
     @Override
     public boolean update(OVChipkaart ovChipkaart) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.update(ovChipkaart);
             session.getTransaction().commit();
             return true;
@@ -47,7 +48,7 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
     @Override
     public boolean delete(OVChipkaart ovChipkaart) {
         try {
-            session.beginTransaction();
+            queueTransaction();
             session.delete(ovChipkaart);
             session.getTransaction().commit();
             return true;
@@ -84,5 +85,17 @@ public class OVChipkaartDAOHibernate implements OVChipkaartDAO {
         Query query = session.createQuery("from ov_chipkaart");
 
         return query.getResultList();
+    }
+
+    private boolean queueTransaction() {
+        try {
+            if (session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
+                session.beginTransaction();
+                return true;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return false;
     }
 }
